@@ -1,6 +1,39 @@
 const bcrypt = require("bcryptjs");
 const User = require("../models/user.model");
 
+const postLogin = async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(401).json({
+      success: false,
+      message: "All fields are required!",
+    });
+  }
+
+  const existingUser = await User.findOne({ email });
+  if (!existingUser) {
+    return res.status(401).json({
+      success: false,
+      message: "No such user exists!",
+    });
+  } else {
+    const passMatch = await bcrypt.compare(password, existingUser.password);
+    if (passMatch) {
+      existingUser.password = undefined;
+      return res.status(200).json({
+        success: true,
+        message: "Login Successfull!",
+        existingUser,
+      });
+    } else {
+      return res.status(401).json({
+        success: true,
+        message: "Password did not match!",
+      });
+    }
+  }
+};
+
 const postRegister = (req, res) => {
   const { firstname, lastname, email, password, confirm_password } = req.body;
 
@@ -74,4 +107,9 @@ const postRegister = (req, res) => {
       });
     }
   });
+};
+
+module.exports = {
+  postRegister,
+  postLogin,
 };
