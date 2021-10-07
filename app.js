@@ -1,8 +1,6 @@
 require("dotenv").config();
 const express = require("express");
 const app = express();
-const authRoutes = require("./routes/user.auth.route");
-const bodyParser = require("body-parser");
 
 const mongoose = require("mongoose");
 
@@ -11,19 +9,22 @@ mongoose
   .connect(process.env.MongoURI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+    useCreateIndex: true,
+
   })
   .then(() => {
     console.log("Connected to Database!");
   })
   .catch((error) => {
     console.log("Error");
+    process.exit(1);
   });
 
 // for parsing application/json
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 //routes
-app.use(authRoutes);
+app.use('/users',require('./routes/user.route'))
 
 module.exports = app;
